@@ -1,7 +1,6 @@
 """Slack MCP tools."""
 
 import os
-from mcp import tool
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
@@ -10,7 +9,6 @@ SLACK_BOT_TOKEN = os.getenv('SLACK_BOT_TOKEN', '')
 slack_client = WebClient(token=SLACK_BOT_TOKEN) if SLACK_BOT_TOKEN else None
 
 
-@tool
 def post_slack_message(channel: str, text: str, thread_ts: str | None = None):
     """Post a message to Slack using bot token from env."""
     if not slack_client:
@@ -30,7 +28,6 @@ def post_slack_message(channel: str, text: str, thread_ts: str | None = None):
         return {'ok': False, 'error': e.response.get('error')}
 
 
-@tool
 def list_slack_channels(types: str = 'public_channel'):
     """List Slack conversations by types (comma-separated)."""
     if not slack_client:
@@ -48,3 +45,9 @@ def list_slack_channels(types: str = 'public_channel'):
         return {'ok': True, 'channels': channels}
     except SlackApiError as e:
         return {'ok': False, 'error': e.response.get('error')}
+
+
+def register(mcp):
+    """Bind this module's tools to a FastMCP server instance."""
+    mcp.tool(post_slack_message)
+    mcp.tool(list_slack_channels)

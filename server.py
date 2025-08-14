@@ -1,30 +1,29 @@
-# server.py
 """
 Lightweight MCP server exposing tools for Jira, Gmail, and Slack.
 Authentication is currently disabled for simplicity.
 """
 
-from fastapi import FastAPI
-from mcp import MCPServer
-from mcp.transport.http import serve_http
 from dotenv import load_dotenv
+from fastmcp import FastMCP
 
 
 load_dotenv()
 
 
-app = FastAPI()
-mcp = MCPServer(name="jira-gmail-slack-mcp")
+mcp = FastMCP("jira-gmail-slack-mcp")
 
 
-from providers import jira_tools as _jira_tools  # noqa: E402,F401
-from providers import slack_tools as _slack_tools  # noqa: E402,F401
-from providers import gmail_tools as _gmail_tools  # noqa: E402,F401
+from providers import jira_tools as _jira_tools  # noqa: E402
+from providers import slack_tools as _slack_tools  # noqa: E402
+from providers import gmail_tools as _gmail_tools  # noqa: E402
+
+
+# Register all provider tools with this server instance
+_jira_tools.register(mcp)
+_slack_tools.register(mcp)
+_gmail_tools.register(mcp)
 
 
 if __name__ == "__main__":
-    serve_http(mcp)
-
-
-if __name__ == "__main__":
-    serve_http(mcp)
+    # Expose over SSE (HTTP) so clients can connect to http://host:8000/sse
+    mcp.run(transport="sse", host="0.0.0.0", port=8000)

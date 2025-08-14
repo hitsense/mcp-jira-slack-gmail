@@ -11,24 +11,28 @@ JIRA_BASE_URL=https://your-domain.atlassian.net
 JIRA_EMAIL=you@example.com
 JIRA_API_TOKEN=your_api_token
 SLACK_BOT_TOKEN=xoxb-...
-GMAIL_CREDENTIALS_JSON=/app/credentials.json
+GMAIL_CREDENTIALS_JSON=/app/gmail_credentials.json
 ```
 3. Place your Gmail OAuth client file at the path given by `GMAIL_CREDENTIALS_JSON` and do not commit it.
+   - For Docker, this README assumes you mount `gmail_credentials.json` into `/app/gmail_credentials.json` and set `GMAIL_CREDENTIALS_JSON=/app/gmail_credentials.json`.
 
 ## Run locally (Python)
 
 ```bash
 pip install -r requirements.txt  # if present, otherwise:
-pip install mcp fastapi slack_sdk jira google-api-python-client google-auth-oauthlib python-dotenv requests uvicorn
+pip install mcp fastmcp slack_sdk jira google-api-python-client google-auth-oauthlib python-dotenv requests
 
-python server.py
+python server.py  # starts an SSE server on :8000
 ```
 
 ## Build & Run with Docker
 
 ```bash
 docker build -t mcp-server .
-docker run --env-file .env -v $(pwd)/credentials.json:/app/credentials.json:ro -p 8000:8000 mcp-server
+docker run --env-file .env \
+  -v $(pwd)/gmail_credentials.json:/app/gmail_credentials.json:ro \
+  -v $(pwd)/token.json:/app/token.json:rw \
+  -p 8000:8000 mcp-server
 ```
 
 ## Notes

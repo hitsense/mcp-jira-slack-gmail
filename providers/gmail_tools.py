@@ -2,7 +2,6 @@
 
 import os
 import pathlib
-from mcp import tool
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -10,21 +9,18 @@ from googleapiclient.discovery import build
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 GMAIL_CREDENTIALS_JSON = os.getenv('GMAIL_CREDENTIALS_JSON')
+GMAIL_TOKEN_JSON = os.getenv('GMAIL_TOKEN_JSON', 'token.json')
 
 
 def _build_gmail_service():
     creds = None
-    token_path = pathlib.Path('token.json')
+    token_path = pathlib.Path(GMAIL_TOKEN_JSON)
     if token_path.exists():
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        creds = Credentials.from_authorized_user_file(str(token_path), SCOPES)
     elif GMAIL_CREDENTIALS_JSON:
-        flow = InstalledAppFlow.from_client_secrets_file(
-            GMAIL_CREDENTIALS_JSON,
-            SCOPES
-        )
+        flow = InstalledAppFlow.from_client_secrets_file(GMAIL_CREDENTIALS_JSON, SCOPES)
         creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as f:
-            f.write(creds.to_json())
+        token_path.write_text(creds.to_json())
     else:
         raise RuntimeError('GMail credentials missing')
     return build('gmail', 'v1', credentials=creds)
@@ -64,7 +60,6 @@ def _gmail_extract_text(payload, prefer='plain'):
     return None
 
 
-@tool
 def list_emails(q: str = ''):
     try:
         service = _build_gmail_service()
@@ -76,7 +71,6 @@ def list_emails(q: str = ''):
     return {'messages': resp.get('messages', [])}
 
 
-@tool
 def get_email(id: str):
     service = _build_gmail_service()
     msg = service.users().messages().get(
@@ -85,7 +79,6 @@ def get_email(id: str):
     return msg
 
 
-@tool
 def list_gmail_labels():
     try:
         service = _build_gmail_service()
@@ -99,7 +92,6 @@ def list_gmail_labels():
         return {'error': str(e)}
 
 
-@tool
 def search_gmail(q: str = '', max_results: int = 10):
     try:
         service = _build_gmail_service()
@@ -127,7 +119,6 @@ def search_gmail(q: str = '', max_results: int = 10):
         return {'error': str(e)}
 
 
-@tool
 def get_gmail_thread(thread_id: str, prefer_body: str = 'plain'):
     try:
         service = _build_gmail_service()
@@ -151,3 +142,11 @@ def get_gmail_thread(thread_id: str, prefer_body: str = 'plain'):
     except Exception as e:
         return {'error': str(e)}
 
+
+def register(mcp):
+    """Bind this module's tools to a FastMCP server instance."""
+    mcp.tool(list_emails)
+    mcp.tool(get_email)
+    mcp.tool(list_gmail_labels)
+    mcp.tool(search_gmail)
+    mcp.tool(get_gmail_thread)

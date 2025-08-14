@@ -15,6 +15,7 @@ COPY providers ./providers
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir \
       mcp \
+      fastmcp \
       fastapi \
       slack_sdk \
       jira \
@@ -30,5 +31,5 @@ USER appuser
 # Placeholder health check (optional)
 # HEALTHCHECK --timeout=3s CMD curl -f http://localhost:8000/ || exit 1
 
-# server.py calls serve_http(mcp)
+# server.py runs FastMCP SSE on port 8000
 CMD ["python", "server.py"]

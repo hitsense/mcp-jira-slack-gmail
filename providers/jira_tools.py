@@ -2,7 +2,6 @@
 
 import os
 import json
-from mcp import tool
 from mcp.types import TextContent
 from jira import JIRA
 
@@ -24,7 +23,6 @@ def _get_jira_client():
     )
 
 
-@tool
 def get_issue(issue_key: str):
     """Retrieve a full Jira issue with comments and attachments."""
     try:
@@ -79,7 +77,6 @@ def get_issue(issue_key: str):
         ]
 
 
-@tool
 def search_issues(jql: str, max_results: int = 30):
     """Search Jira issues using JQL."""
     if not jql:
@@ -122,7 +119,6 @@ def search_issues(jql: str, max_results: int = 30):
         ]
 
 
-@tool
 def add_jira_comment(issue_key: str, body: str):
     """Add a comment to a Jira issue."""
     try:
@@ -136,3 +132,9 @@ def add_jira_comment(issue_key: str, body: str):
     except Exception as e:
         return {'ok': False, 'error': str(e)}
 
+
+def register(mcp):
+    """Bind this module's tools to a FastMCP server instance."""
+    mcp.tool(get_issue)
+    mcp.tool(search_issues)
+    mcp.tool(add_jira_comment)
