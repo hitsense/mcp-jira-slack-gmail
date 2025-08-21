@@ -49,7 +49,7 @@ ecs:
 
     container_definitions:
       - name: mcp_jira_slack_gmail_image
-        image: "709883585785.dkr.ecr.us-west-2.amazonaws.com/mlops/mcp-jira-slack-gmail:latest"
+        image: "${ECR_URI}/mcp-jira-slack-gmail:${IMAGE_TAG:-latest}"
         essential: true
         portMappings:
           - containerPort: 8000
