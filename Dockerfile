@@ -1,11 +1,14 @@
 # Stage 1: Build dependencies (if needed in the future)
 # Currently not used, but left as placeholder for tasks like static code analysis or type checking
-FROM python:3.11-slim
+FROM python:3.12-slim-bookworm
 
 # Security: run as non-root user
 RUN addgroup --system appuser && adduser --system --ingroup appuser appuser
 
 WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 # Copy source
 COPY server.py ./

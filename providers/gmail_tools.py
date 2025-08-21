@@ -18,7 +18,9 @@ def _build_gmail_service():
     if token_path.exists():
         creds = Credentials.from_authorized_user_file(str(token_path), SCOPES)
     elif GMAIL_CREDENTIALS_JSON:
-        flow = InstalledAppFlow.from_client_secrets_file(GMAIL_CREDENTIALS_JSON, SCOPES)
+        flow = InstalledAppFlow.from_client_secrets_file(
+            GMAIL_CREDENTIALS_JSON, SCOPES
+            )
         creds = flow.run_local_server(port=0)
         token_path.write_text(creds.to_json())
     else:
